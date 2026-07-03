@@ -1,5 +1,5 @@
-use crate::errors::Bt2Result;
 use crate::structs::Batch;
+use crate::error::SyntaxResult;
 use tokenizer::BatchTokenizer;
 use escaping::escape;
 
@@ -7,10 +7,10 @@ mod chars;
 mod builder;
 mod state;
 mod tokenizer;
-mod position;
+mod context;
 mod escaping;
 
-pub fn split_source_code(source_code: &str) -> Bt2Result<Vec<Batch>> {
+pub fn split_source_code(source_code: &str) -> SyntaxResult<Vec<Batch>> {
     BatchTokenizer::new(source_code).split_into_batches()
 }
 

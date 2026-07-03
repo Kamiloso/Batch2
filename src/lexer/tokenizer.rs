@@ -1,17 +1,23 @@
 use std::iter;
-use crate::errors::{Bt2Result, SyntaxError};
-use crate::lexer;
+use crate::error::SyntaxResult;
 use crate::lexer::builder::LexBuilder;
 use crate::lexer::state::{PtrState, FreeMode, PtrReturn};
-use crate::lexer::position::LexPosition;
+use crate::lexer::context::LexContext;
 use crate::structs::Batch;
 use crate::lexer::chars;
+
+type SyntaxOption<T> = SyntaxResult<Option<T>>;
+
+struct CharPair {
+    c: char,
+    is_escaped: bool,
+}
 
 pub struct BatchTokenizer<'a> {
     source_code: &'a str,
     builder: LexBuilder,
     state: Box<dyn PtrState>,
-    position: LexPosition,
+    context: LexContext,
 }
 
 impl<'a> BatchTokenizer<'a> {
@@ -20,23 +26,24 @@ impl<'a> BatchTokenizer<'a> {
             source_code,
             builder: LexBuilder::new(),
             state: Box::new(FreeMode::new_invoked()),
-            position: LexPosition::new(),
+            context: LexContext::new(),
         }
     }
 
-    pub fn split_into_batches(mut self) -> Bt2Result<Vec<Batch>> {
+    pub fn split_into_batches(mut self) -> SyntaxResult<Vec<Batch>> {
         let mut chars = self.source_code.chars()
             .chain(iter::once(chars::NEWLINE));
         
-        while let Some((c, is_escaped)) = self.get_next_struct(&mut chars)? {
+        while let Some(char_pair) = self.next_char_pair(&mut chars)? {
+            let CharPair { c, is_escaped } = char_pair;
+            
             let Some(PtrReturn {
                 new_state,
                 is_add_char,
                 is_flush_to_batch,
                 is_flush_to_vec,
             }) = self.state.get_return_struct(c, is_escaped) else {
-                return self.position.syntax_error("Unexpected character.")
-                    .raise();
+                self.context.raise_at_char("Unexpected character", c)?
             };
             
             self.state = new_state;
@@ -51,47 +58,47 @@ impl<'a> BatchTokenizer<'a> {
                 self.builder.flush_to_vec();
             }
         }
-
-        if self.builder.is_vec_ready() {
-            Ok(self.builder.into_vec())
-        } else {
-            self.position.syntax_error("Unfinished token.")
-                .raise()
+        
+        if !self.builder.is_vec_ready() {
+            self.context.raise_raw("Unfinished token")?
         }
+
+        Ok(self.builder.into_vec())
     }
-
-    fn get_next_struct<T>(&mut self, iter: &mut T) -> Bt2Result<Option<(char, bool)>>
-    where
-        T: Iterator<Item=char>
-    {
-        let first = match iter.next() {
-            Some(c) => {
-                self.position.inject_char(c);
-                c
-            },
-            None => return Ok(None),
+    
+    fn next_char_pair(&mut self, iter: &mut impl Iterator<Item=char>) -> SyntaxOption<CharPair> {
+        let Some(c0) = iter.next() else {
+            return Ok(None);
         };
+        
+        self.context.inject_char(c0);
 
+        let ctx_snapshot = self.context.clone();
         let escaper = self.state.escaper();
-
-        if !escaper.is_escape_char(first) {
-            return Ok(Some((first, false)));
+        
+        if !escaper.is_escape_char(c0) {
+            return Ok(Some(CharPair {
+                c: c0,
+                is_escaped: false
+            }));
         }
 
-        let pos_snapshot = self.position.clone();
+        let mut escape_seq = String::from(c0);
+        
+        while let Some(cn) = iter.next() {
+            self.context.inject_char(cn);
+            escape_seq.push(cn);
 
-        let mut sequence = String::from(first);
-        while let Some(c) = iter.next() {
-            self.position.inject_char(c);
-            sequence.push(c);
-
-            if let Some(c) = escaper.try_unescape_sequence(&sequence) {
-                return Ok(Some((c, true)));
+            if let Some(c) = escaper.try_unescape_seq(&escape_seq) {
+                return Ok(Some(CharPair {
+                    c,
+                    is_escaped: true,
+                }));
             }
         }
         
-        pos_snapshot.syntax_error("Invalid escape sequence.")
-            .with_presentation("Sequence", &lexer::token_to_definition(&sequence))
-            .raise()
+        // TODO: trim escape_seq to better length
+        
+        ctx_snapshot.raise_at_seq("Invalid escape sequence", &escape_seq)?
     }
 }

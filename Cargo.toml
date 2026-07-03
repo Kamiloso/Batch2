@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 clearscreen = "4.0.6"
 unescape = "0.1.0"
+thiserror = "2.0.18"

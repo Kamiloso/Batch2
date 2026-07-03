@@ -7,26 +7,20 @@ pub struct Token {
 
 impl Token {
     pub fn tok_index(&self) -> usize { self.tok_index }
+    pub fn value(&self) -> &String { &self.value }
     
-    pub fn new(tok_index: usize, value: String) -> Self {
-        Self { tok_index, value }
+    pub fn new(tok_index: usize, value: impl Into<String>) -> Self {
+        Self {
+            tok_index,
+            value: value.into(),
+        }
     }
     
     pub fn to_value(&self) -> String {
         self.value.clone()
     }
-    
-    pub fn to_expanded_value<T>(&self, dict: T) -> String {
-        todo!()
-    }
 
     pub fn to_definition(&self) -> String {
         lexer::token_to_definition(&self.value)
-    }
-}
-
-impl AsRef<str> for Token {
-    fn as_ref(&self) -> &str {
-        &self.value
     }
 }

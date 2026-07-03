@@ -1,30 +1,29 @@
 mod scope;
+mod outcome;
+mod cmd;
+mod context;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
-use crate::errors::Bt2Error;
 use crate::utils::cli;
+use outcome::Outcome;
 use scope::Scope;
 
-pub fn run_console() -> ExitCode {
-    let mut root_scope = Scope::new_root(&PathBuf::new());
+pub fn run_console(cd_path_init: impl Into<PathBuf>) -> ExitCode {
+    let mut root = Scope::new_root(cd_path_init);
     
     loop {
-        let cd_path_display = root_scope.cd_path().display();
-        let raw_input = cli::multiline_input!("{cd_path_display}> ");
-        
-        match root_scope.interpret_code(&raw_input) {
-            Ok(_) => {},
-            Err(Bt2Error::Syntax(err)) => {
-                cli::eprintln!("{err}");
-            },
-            Err(Bt2Error::Exit(err)) => {
-                return ExitCode::from(err.code())
-            },
+        let cd_path_display = root.cd_path_display();
+        let source_code = cli::multiline_input!("{cd_path_display}> ");
+
+        match Outcome::from(root.interpret(&source_code)) {
+            Outcome::Continue { out: text } => { cli::print!("{text}"); },
+            Outcome::Failure { display } => { cli::eprintln!("{display}"); },
+            Outcome::Exit { code } => return code,
         }
     }
 }
 
-pub fn run_file<T>(path: T) -> ExitCode {
+pub fn run_file(cd_path_init: &Path) -> ExitCode {
     todo!()
 }

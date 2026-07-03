@@ -27,7 +27,7 @@ impl LexBuilder {
     }
     
     pub fn flush_to_vec(&mut self) {
-        self.ensure_empty_word();
+        self.assert_word_empty();
         
         let new_batch = Batch::make_next(&self.batch);
         let taken = mem::replace(&mut self.batch, new_batch);
@@ -36,25 +36,21 @@ impl LexBuilder {
     }
     
     pub fn is_vec_ready(&self) -> bool {
-        self.word.is_empty() && self.batch.as_ref().is_empty()
+        self.word.is_empty() && self.batch.tokens().is_empty()
     }
     
     pub fn into_vec(self) -> Vec<Batch> {
-        self.ensure_empty_word();
-        self.ensure_empty_batch();
+        self.assert_word_empty();
+        self.assert_batch_empty();
         
         self.vec
     }
     
-    fn ensure_empty_word(&self) {
-        if !self.word.is_empty() {
-            panic!("word is not empty");
-        }
+    fn assert_word_empty(&self) {
+        assert!(self.word.is_empty(), "word must be empty");
     }
     
-    fn ensure_empty_batch(&self) {
-        if !self.batch.as_ref().is_empty() {
-            panic!("batch is not empty");
-        }
+    fn assert_batch_empty(&self) {
+        assert!(self.batch.tokens().is_empty(), "batch must be empty");
     }
 }

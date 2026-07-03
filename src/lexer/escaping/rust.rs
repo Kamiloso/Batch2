@@ -10,9 +10,9 @@ impl EscapeStrategy for RustEscapeStrategy {
         c == ESCAPE
     }
 
-    fn try_unescape_sequence(&self, sequence: &str) -> Option<char> {
-        let text = unescape(sequence)?;
-        if text.len() == 1 {
+    fn try_unescape_seq(&self, seq: &str) -> Option<char> {
+        let text = unescape(seq)?;
+        if text.chars().count() == 1 {
             text.chars().next()
         } else {
             None

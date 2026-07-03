@@ -7,7 +7,7 @@ impl EscapeStrategy for DisabledEscapeStrategy {
         false
     }
 
-    fn try_unescape_sequence(&self, sequence: &str) -> Option<char> {
+    fn try_unescape_seq(&self, seq: &str) -> Option<char> {
         None
     }
     

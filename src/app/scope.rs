@@ -1,10 +1,9 @@
-use std::path::{Path, PathBuf};
-use crate::errors::Bt2Result;
-use crate::utils::cli;
+use std::path::{Display, PathBuf};
+use crate::app::cmd::{Cmd, Cls, Echo, Exit};
+use crate::app::context::BatchContext;
+use crate::error::{InterpreterResult, RuntimeResult};
 use crate::lexer;
-use crate::cmd::Cmd;
 use crate::structs::Batch;
-use crate::cmd::{Echo, Cls, Exit};
 
 pub struct Scope {
     is_root: bool,
@@ -12,48 +11,55 @@ pub struct Scope {
 }
 
 impl Scope {
-    pub fn is_root(&self) -> bool { self.is_root }
-    pub fn cd_path(&self) -> &Path { &self.cd_path }
-
-    pub fn new_root(cd_path: &Path) -> Self {
+    pub fn new_root(cd_path: impl Into<PathBuf>) -> Self {
         Scope {
             is_root: true,
-            cd_path: PathBuf::from(cd_path),
+            cd_path: cd_path.into(),
         }
     }
+    
+    pub fn cd_path_display(&self) -> Display<'_> {
+        self.cd_path.display()
+    }
 
-    pub fn interpret_code(&mut self, code: &str) -> Bt2Result<String> {
-        let mut result_buffer = String::new();
-        let batches: Vec<Batch> = lexer::split_source_code(code)?;
+    pub fn interpret(&mut self, source_code: &str) -> InterpreterResult<String> {
+        let batches: Vec<Batch> = lexer::split_source_code(source_code)?;
+        let mut out_buffer = String::new();
         
         for batch in batches {
-            let tokens = batch.as_ref();
-            
-            if tokens.is_empty() {
-                continue;
-            }
-            
-            let prim_token = &tokens[0];
-            let prim_str = prim_token.as_ref();
-            
-            let result_part = match prim_str {
-                Echo::NAME => Echo::execute(&batch)?,
-                Cls::NAME => Cls::execute(&batch)?,
-                Exit::NAME => Exit::execute(&batch)?,
-                _ => {
-                    batch.syntax_error_at_token("Unknown command.", prim_token)
-                        .raise()?
-                }
-            };
-
-            result_buffer += &result_part;
+            out_buffer += &self.execute_batch(batch)?;
         }
 
-        if self.is_root {
-            cli::print!("{}", result_buffer);
-            result_buffer.clear();
+        Ok(out_buffer)
+    }
+
+    pub fn execute_batch(&mut self, batch: Batch) -> RuntimeResult<String> {
+        let context = BatchContext::new(self, batch);
+        let tokens = context.tokens();
+
+        if tokens.is_empty() {
+            return Ok(String::new());
         }
 
-        Ok(result_buffer)
+        let cmd_token = &tokens[0];
+        let cmd_str = cmd_token.value();
+
+        // --- FUTURE MACRO BEGIN ---
+
+        if cmd_str == Echo::name() {
+            return Ok(Echo::execute(context)?);
+        }
+
+        if cmd_str == Cls::name() {
+            return Ok(Cls::execute(context)?);
+        }
+
+        if cmd_str == Exit::name() {
+            return Ok(Exit::execute(context)?);
+        }
+
+        // --- FUTURE MACRO END ---
+
+        context.raise_raw(format!("Unknown command: {cmd_str}"))?
     }
 }
