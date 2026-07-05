@@ -3,13 +3,13 @@ use crate::lexer;
 use crate::lexer::chars;
 
 #[derive(Clone)]
-pub struct LexContext {
+pub struct SyntaxContext {
     last_char: Option<char>,
     lin_index: usize,
     col_index: usize,
 }
 
-impl LexContext {
+impl SyntaxContext {
     pub fn new() -> Self {
         Self {
             last_char: None,
@@ -41,8 +41,12 @@ impl LexContext {
     pub fn raise_at_char<T>(&self, message: impl Into<String>, c: char) -> SyntaxResult<T> {
         self.assert_injected();
         
-        let seq = String::from(self.last_char.unwrap());
-        self.raise_at_seq(message, &seq)?
+        let seq = String::from(c);
+        let seq_definition = &lexer::token_to_definition(&seq);
+
+        SyntaxError::new(message, self.lin_index, self.col_index)
+            .with_char_str(seq_definition)
+            .raise()?
     }
     
     pub fn raise_at_seq<T>(&self, message: impl Into<String>, seq: &str) -> SyntaxResult<T> {

@@ -1,15 +1,15 @@
 use crate::error::RuntimeResult;
-use crate::app::context::BatchContext;
-use super::{Cmd, cmd_pre_assert};
+use crate::app::context::RuntimeContext;
+use crate::app::cmd::{Cmd, cmd_pre_assert};
 
 pub struct Echo;
 
 impl Cmd for Echo {
-    fn name() -> &'static str { "echo" }
-    fn min() -> usize { 1 }
+    fn name(&self) -> &str { "echo" }
+    fn min(&self) -> usize { 1 }
 
-    fn execute(context: BatchContext) -> RuntimeResult<String> {
-        cmd_pre_assert::<Self>(&context)?;
+    fn execute(&self, context: RuntimeContext) -> RuntimeResult<String> {
+        cmd_pre_assert::<Self>(self, &context)?;
         
         let tokens = context.tokens();
         let mut sb = String::new();

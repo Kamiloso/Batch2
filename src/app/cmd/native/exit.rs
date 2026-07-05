@@ -1,15 +1,15 @@
 use crate::error::RuntimeResult;
-use crate::app::context::BatchContext;
-use super::{Cmd, cmd_pre_assert, parse_token};
+use crate::app::context::RuntimeContext;
+use crate::app::cmd::{Cmd, cmd_pre_assert, parse_token};
 
 pub struct Exit;
 
 impl Cmd for Exit {
-    fn name() -> &'static str { "exit" }
-    fn min() -> usize { 1 }
+    fn name(&self) -> &'static str { "exit" }
+    fn min(&self) -> usize { 1 }
     
-    fn execute(context: BatchContext) -> RuntimeResult<String> {
-        cmd_pre_assert::<Self>(&context)?;
+    fn execute(&self, context: RuntimeContext) -> RuntimeResult<String> {
+        cmd_pre_assert::<Self>(self, &context)?;
 
         let tokens = context.tokens();
         

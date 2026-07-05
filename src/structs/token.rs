@@ -1,5 +1,6 @@
 use crate::lexer;
 
+#[derive(Clone)]
 pub struct Token {
     tok_index: usize,
     value: String,

@@ -1,5 +1,6 @@
 use crate::structs::Token;
 
+#[derive(Clone)]
 pub struct Batch {
     lin_index: usize,
     tokens: Vec<Token>,

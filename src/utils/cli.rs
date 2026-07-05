@@ -37,7 +37,7 @@ macro_rules! _cli_input {
             .read_line(&mut line)
             .expect("unable to read from stdin");
 
-        let len = line.trim_end_matches(|c| c == '\r' || c == '\n').len();
+        let len = line.trim_end_matches(['\r', '\n']).len();
         line.truncate(len);
         
         line
@@ -49,6 +49,8 @@ macro_rules! _cli_multiline_input {
         $crate::utils::cli::print!($($arg)*);
 
         let mut result = String::new();
+        
+        // TODO: double ^^ must convert into ^ and odd amount indicates newline (only at the end)
 
         loop {
             let mut line = String::new();

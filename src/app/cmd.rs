@@ -1,34 +1,30 @@
-mod echo;
-mod cls;
-mod exit;
+mod native;
 
 use std::any;
 use std::str::FromStr;
-use crate::app::context::BatchContext;
+use crate::app::context::RuntimeContext;
 use crate::structs::Token;
 use crate::error::RuntimeResult;
 use crate::lexer;
-pub use echo::Echo;
-pub use cls::Cls;
-pub use exit::Exit;
+pub use native::NATIVE_CMDS;
 
 pub trait Cmd {
-    fn name() -> &'static str;
-    fn min() -> usize;
-    fn execute(context: BatchContext) -> RuntimeResult<String>;
+    fn name(&self) -> &str;
+    fn min(&self) -> usize;
+    fn execute(&self, context: RuntimeContext) -> RuntimeResult<String>;
 }
 
-fn cmd_pre_assert<C: Cmd>(context: &BatchContext) -> RuntimeResult<()> {
+fn cmd_pre_assert<C: Cmd>(cmd: &impl Cmd, context: &RuntimeContext) -> RuntimeResult<()> {
     let tokens = context.tokens();
 
     assert!(tokens.len() >= 1);
-    assert_eq!(tokens[0].value(), C::name());
+    assert_eq!(tokens[0].value(), cmd.name());
 
-    if tokens.len() < C::min() {
+    if tokens.len() < cmd.min() {
         context.raise_raw(
             format!(
                 "Command {} requires at least {} arguments, but only {} was provided",
-                lexer::token_to_definition(C::name()), C::min(), tokens.len()
+                lexer::token_to_definition(cmd.name()), cmd.min(), tokens.len()
             )
         )?
     }
@@ -36,12 +32,12 @@ fn cmd_pre_assert<C: Cmd>(context: &BatchContext) -> RuntimeResult<()> {
     Ok(())
 }
 
-fn parse_token<F: FromStr>(context: &BatchContext, token: &Token) -> RuntimeResult<F> {
+fn parse_token<F: FromStr>(context: &RuntimeContext, token: &Token) -> RuntimeResult<F> {
     parse_token_slice::<F>(context, token, token.value())
 }
 
 fn parse_token_slice<F: FromStr>(
-    context: &BatchContext,
+    context: &RuntimeContext,
     token: &Token,
     s: &str
 ) -> RuntimeResult<F> {

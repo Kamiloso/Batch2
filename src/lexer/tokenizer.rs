@@ -2,9 +2,10 @@ use std::iter;
 use crate::error::SyntaxResult;
 use crate::lexer::builder::LexBuilder;
 use crate::lexer::state::{PtrState, FreeMode, PtrReturn};
-use crate::lexer::context::LexContext;
-use crate::structs::Batch;
+use crate::lexer::context::SyntaxContext;
 use crate::lexer::chars;
+use crate::structs::Batch;
+use crate::utils::text;
 
 type SyntaxOption<T> = SyntaxResult<Option<T>>;
 
@@ -17,7 +18,7 @@ pub struct BatchTokenizer<'a> {
     source_code: &'a str,
     builder: LexBuilder,
     state: Box<dyn PtrState>,
-    context: LexContext,
+    context: SyntaxContext,
 }
 
 impl<'a> BatchTokenizer<'a> {
@@ -26,11 +27,12 @@ impl<'a> BatchTokenizer<'a> {
             source_code,
             builder: LexBuilder::new(),
             state: Box::new(FreeMode::new_invoked()),
-            context: LexContext::new(),
+            context: SyntaxContext::new(),
         }
     }
-
+    
     pub fn split_into_batches(mut self) -> SyntaxResult<Vec<Batch>> {
+        
         let mut chars = self.source_code.chars()
             .chain(iter::once(chars::NEWLINE));
         
@@ -97,8 +99,9 @@ impl<'a> BatchTokenizer<'a> {
             }
         }
         
-        // TODO: trim escape_seq to better length
-        
-        ctx_snapshot.raise_at_seq("Invalid escape sequence", &escape_seq)?
+        ctx_snapshot.raise_at_seq(
+            "Invalid escape sequence",
+            text::substr(&escape_seq, 0..2)
+        )?
     }
 }
