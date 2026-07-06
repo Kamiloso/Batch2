@@ -20,5 +20,13 @@ impl Token {
 }
 
 impl AsRef<str> for Token {
-    fn as_ref(&self) -> &str { &self.value }
+    fn as_ref(&self) -> &str { self.value() }
+}
+
+impl From<Token> for String {
+    fn from(token: Token) -> String { token.to_value() }
+}
+
+impl From<&Token> for String {
+    fn from(token: &Token) -> String { token.to_value() }
 }

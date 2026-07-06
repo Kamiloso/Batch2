@@ -1,4 +1,4 @@
-use crate::lexer::chars;
+use crate::utils::chars;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 use crate::lexer::escaping::DisabledEscapeStrategy;
 

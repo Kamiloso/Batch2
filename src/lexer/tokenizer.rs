@@ -3,7 +3,7 @@ use crate::error::SyntaxResult;
 use crate::lexer::builder::LexBuilder;
 use crate::lexer::state::{PtrState, FreeMode, PtrReturn};
 use crate::lexer::context::SyntaxContext;
-use crate::lexer::chars;
+use crate::utils::chars;
 use crate::structs::Batch;
 use crate::utils::text;
 

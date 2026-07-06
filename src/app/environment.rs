@@ -1,3 +1,4 @@
+use std::path::Path;
 use crate::app::cmd;
 use crate::app::shell::Shell;
 use crate::app::scope::Scope;
@@ -35,7 +36,7 @@ impl Environment {
 
     pub fn get(&self, key: &str) -> &str {
         for scope in self.scopes.iter().rev() {
-            if let Some(value) = scope.get(key) {
+            if let Some(value) = scope.get(key.as_ref()) {
                 return value;
             }
         }
@@ -45,6 +46,18 @@ impl Environment {
 
     pub fn set(&mut self, key: impl Into<String>, value: impl Into<String>) {
         self.scopes.last_mut().unwrap().set(key, value);
+    }
+    
+    pub fn get_const(&self, key: &str) -> &str {
+        match key.as_ref() {
+            "true" => "T",
+            "false" => "",
+            "cd" => {
+                let path = self.shell.cd().unwrap_or(Path::new(""));
+                path.to_str().unwrap_or("")
+            },
+            _ => ""
+        }
     }
     
     pub fn enter_scope(&mut self) {

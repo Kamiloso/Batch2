@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 static INIT_GUARD: AtomicBool = AtomicBool::new(false);
 
 pub struct Shell {
-    cwd: Option<PathBuf>,
+    cd: Option<PathBuf>,
 }
 
 impl Shell {
@@ -15,28 +15,28 @@ impl Shell {
             panic!("shell state initialized multiple times")
         }
 
-        let cwd = match env::current_dir() {
+        let cd = match env::current_dir() {
             Ok(dir) => Some(dir),
             Err(_) => None,
         };
 
-        Self { cwd }
+        Self { cd }
     }
 
-    pub fn cwd(&self) -> Option<&Path> {
-        self.cwd.as_deref()
+    pub fn cd(&self) -> Option<&Path> {
+        self.cd.as_deref()
     }
 
-    pub fn set_cwd(&mut self, path: &Path) -> io::Result<()> {
+    pub fn set_cd(&mut self, path: &Path) -> io::Result<()> {
         env::set_current_dir(path)?;
         
-        self.cwd = env::current_dir().ok();
+        self.cd = env::current_dir().ok();
 
         Ok(())
     }
 
-    pub fn cwd_display(&self) -> String {
-        match &self.cwd {
+    pub fn cd_display(&self) -> String {
+        match &self.cd {
             Some(path) => path.display().to_string(),
             None => format!("?:{}", MAIN_SEPARATOR),
         }

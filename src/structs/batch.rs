@@ -29,3 +29,9 @@ impl Batch {
         self.tokens.push(token);
     }
 }
+
+impl AsRef<[Token]> for Batch {
+    fn as_ref(&self) -> &[Token] {
+        &self.tokens
+    }
+}

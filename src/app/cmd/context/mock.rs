@@ -1,6 +1,6 @@
 use crate::app::cmd::Cmd;
-use crate::app::cmd::context::CmdContext;
 use crate::error::RuntimeResult;
+use super::CmdContext;
 
 pub struct MockCmd;
 

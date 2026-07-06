@@ -2,8 +2,8 @@ use crate::structs::Batch;
 use crate::error::SyntaxResult;
 use tokenizer::BatchTokenizer;
 use escaping::escape;
+use crate::utils::chars;
 
-mod chars;
 mod builder;
 mod state;
 mod tokenizer;
@@ -24,8 +24,11 @@ pub fn definition_of(value: impl AsRef<str>) -> String {
     }
 }
 
-pub fn code_snippet_of(batch: &Batch) -> String {
-    batch.tokens().iter()
+pub fn code_snippet_of<T>(value: impl AsRef<[T]>) -> String
+where
+    T: AsRef<str>,
+{
+    value.as_ref().iter()
         .map(definition_of)
         .collect::<Vec<String>>()
         .join(" ")

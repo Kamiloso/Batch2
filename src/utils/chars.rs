@@ -13,7 +13,7 @@ pub fn is_newline(c: char) -> bool {
 }
 
 pub fn is_solid(c: char) -> bool {
-    c.is_alphanumeric() || matches!(c, '_' | '%')
+    c.is_alphanumeric() || matches!(c, '_' | '%' | '!' | '=')
 }
 
 pub fn is_quote(c: char) -> bool {

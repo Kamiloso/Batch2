@@ -3,3 +3,4 @@ mod utils;
 mod lexer;
 mod error;
 mod structs;
+mod vars;

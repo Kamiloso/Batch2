@@ -14,21 +14,20 @@ trait Cmd {
 }
 
 pub fn delegate_action(env: &mut Environment, batch: &Batch) -> RuntimeResult<String> {
+    let ctx = CmdContext::new_mock(env, batch);
     let tokens = batch.tokens();
 
     if tokens.is_empty() {
         return Ok(String::new());
     }
-
-    let name_token = &tokens[0];
-    let name = name_token.value();
-
+    
+    let name = &ctx.token_expansion_at(0);
+    
     for &cmd in NATIVE_CMD_LIST {
         if cmd.name_matches(name) {
             return Ok(cmd.execute(CmdContext::new(cmd, env, batch))?);
         }
     }
     
-    CmdContext::new_mock(env, batch)
-        .raise_at_token("Unknown command", name_token)?
+    ctx.raise_at_token("Unknown command", 0)?
 }

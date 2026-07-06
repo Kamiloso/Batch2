@@ -6,13 +6,11 @@ define_native_cmd!(Exit, "exit");
 
 impl Exit {
     fn execute(ctx: CmdContext) -> RuntimeResult<String> {
-        let tokens = ctx.batch.tokens();
-
-        if tokens.len() <= 1 {
-            ctx.raise_success_code()?
+        if ctx.token_count() >= 2 {
+            let code = ctx.parse_token(1)?;
+            ctx.raise_failure_code(code)?
         }
 
-        let code = ctx.parse_token(&tokens[1])?;
-        ctx.raise_failure_code(code)?
+        ctx.raise_success_code()?
     }
 }

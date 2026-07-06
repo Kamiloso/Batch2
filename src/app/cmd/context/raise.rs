@@ -1,6 +1,5 @@
 use crate::error::{ExitError, ExitResult, PanicError, PanicResult};
 use crate::lexer;
-use crate::structs::Token;
 use super::CmdContext;
 
 impl CmdContext<'_> {
@@ -10,7 +9,9 @@ impl CmdContext<'_> {
             .raise()?
     }
 
-    pub fn raise_at_token<T>(&self, msg: impl Into<String>, token: &Token) -> PanicResult<T> {
+    pub fn raise_at_token<T>(&self, msg: impl Into<String>, idx: usize) -> PanicResult<T> {
+        let token = self.token_at(idx);
+        
         PanicError::new(msg, self.batch.lin_index())
             .with_tok_index(token.tok_index())
             .with_token_str(lexer::definition_of(token))

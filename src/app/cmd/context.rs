@@ -2,6 +2,7 @@ mod raise;
 mod parse;
 mod ensure;
 mod mock;
+mod token;
 
 use crate::app::cmd::Cmd;
 use crate::app::cmd::context::mock::MockCmd;

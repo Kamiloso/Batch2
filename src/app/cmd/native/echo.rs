@@ -6,11 +6,10 @@ define_native_cmd!(Echo, "echo");
 
 impl Echo {
     fn execute(ctx: CmdContext) -> RuntimeResult<String> {
-        let tokens = ctx.batch.tokens();
         let mut sb = String::new();
-
-        for token in tokens[1..].iter() {
-            sb.push_str(token.value());
+        
+        for i in 1..ctx.token_count() {
+            sb.push_str(&ctx.token_expansion_at(i));
             sb.push(' ');
         }
 
