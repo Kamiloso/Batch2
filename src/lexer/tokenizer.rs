@@ -32,7 +32,6 @@ impl<'a> BatchTokenizer<'a> {
     }
     
     pub fn split_into_batches(mut self) -> SyntaxResult<Vec<Batch>> {
-        
         let mut chars = self.source_code.chars()
             .chain(iter::once(chars::NEWLINE));
         

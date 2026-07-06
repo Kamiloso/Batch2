@@ -1,6 +1,3 @@
-use crate::lexer;
-
-#[derive(Clone)]
 pub struct Token {
     tok_index: usize,
     value: String,
@@ -20,8 +17,8 @@ impl Token {
     pub fn to_value(&self) -> String {
         self.value.clone()
     }
+}
 
-    pub fn to_definition(&self) -> String {
-        lexer::token_to_definition(&self.value)
-    }
+impl AsRef<str> for Token {
+    fn as_ref(&self) -> &str { &self.value }
 }

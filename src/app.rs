@@ -1,8 +1,6 @@
 mod environment;
 mod outcome;
 mod cmd;
-mod context;
-mod run;
 mod shell;
 mod scope;
 
@@ -26,7 +24,7 @@ fn run_console(shell: Shell) -> ExitCode {
         let prefix = env.shell().cwd_display();
         let source_code = cli::multiline_input!("{prefix}> ");
 
-        let result = run::interpret(&mut env, &source_code);
+        let result = env.interpret(&source_code);
 
         match Outcome::from(result) {
             Outcome::Continue { out: text } => { cli::print!("{text}"); },

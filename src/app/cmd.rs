@@ -1,54 +1,34 @@
 mod native;
+mod context;
 
-use std::any;
-use std::str::FromStr;
-use crate::app::context::RuntimeContext;
-use crate::structs::Token;
 use crate::error::RuntimeResult;
-use crate::lexer;
-pub use native::NATIVE_CMDS;
+use crate::app::environment::Environment;
+use crate::structs::Batch;
+use context::CmdContext;
+use native::NATIVE_CMD_LIST;
 
-pub trait Cmd {
+trait Cmd {
     fn name(&self) -> &str;
-    fn min(&self) -> usize;
-    fn execute(&self, context: RuntimeContext) -> RuntimeResult<String>;
+    fn name_matches(&self, name: &str) -> bool;
+    fn execute(&self, ctx: CmdContext) -> RuntimeResult<String>;
 }
 
-fn cmd_pre_assert<C: Cmd>(cmd: &impl Cmd, context: &RuntimeContext) -> RuntimeResult<()> {
-    let tokens = context.tokens();
+pub fn delegate_action(env: &mut Environment, batch: &Batch) -> RuntimeResult<String> {
+    let tokens = batch.tokens();
 
-    assert!(tokens.len() >= 1);
-    assert_eq!(tokens[0].value(), cmd.name());
-
-    if tokens.len() < cmd.min() {
-        context.raise_raw(
-            format!(
-                "Command {} requires at least {} arguments, but only {} was provided",
-                lexer::token_to_definition(cmd.name()), cmd.min(), tokens.len()
-            )
-        )?
+    if tokens.is_empty() {
+        return Ok(String::new());
     }
 
-    Ok(())
-}
+    let name_token = &tokens[0];
+    let name = name_token.value();
 
-fn parse_token<F: FromStr>(context: &RuntimeContext, token: &Token) -> RuntimeResult<F> {
-    parse_token_slice::<F>(context, token, token.value())
-}
-
-fn parse_token_slice<F: FromStr>(
-    context: &RuntimeContext,
-    token: &Token,
-    s: &str
-) -> RuntimeResult<F> {
-    match s.parse::<F>() {
-        Ok(f) => Ok(f),
-        Err(_) => context.raise_at_token(
-            format!(
-                "Value {} cannot be converted into {}",
-                lexer::token_to_definition(s), any::type_name::<F>()
-            ),
-            token,
-        )?
+    for &cmd in NATIVE_CMD_LIST {
+        if cmd.name_matches(name) {
+            return Ok(cmd.execute(CmdContext::new(cmd, env, batch))?);
+        }
     }
+    
+    CmdContext::new_mock(env, batch)
+        .raise_at_token("Unknown command", name_token)?
 }

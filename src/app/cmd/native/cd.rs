@@ -1,28 +1,28 @@
 use std::path::Path;
 use crate::error::RuntimeResult;
-use crate::app::context::RuntimeContext;
-use crate::app::cmd::{Cmd, cmd_pre_assert};
+use crate::app::cmd::CmdContext;
+use crate::define_native_cmd;
 
-pub struct Cd;
+define_native_cmd!(Cd, "cd");
 
-impl Cmd for Cd {
-    fn name(&self) -> &'static str { "cd" }
-    fn min(&self) -> usize { 2 }
-    
-    fn execute(&self, mut context: RuntimeContext) -> RuntimeResult<String> {
-        cmd_pre_assert::<Self>(self, &context)?;
+impl Cd {
+    fn execute(ctx: CmdContext) -> RuntimeResult<String> {
+        ctx.token_len_at_least(2)?;
         
         // TODO: make it better, I'm tired for now
-        
-        let tokens = context.tokens().clone();
-        
+
+        let tokens = ctx.batch.tokens();
+
         let path_token = &tokens[1];
         let path_string = path_token.value();
         let path = Path::new(&path_string);
-        
-        match context.shell_mut().set_cwd(path) {
+
+        match ctx.env.shell_mut().set_cwd(path) {
             Ok(()) => Ok(String::new()),
-            Err(err) => context.raise_at_token("CD error has occurred: TODO better", path_token)?
+            Err(err) => ctx.raise_at_token(
+                "CD error has occurred: TODO better",
+                path_token
+            )?
         }
-    }
+    } 
 }

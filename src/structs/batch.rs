@@ -1,6 +1,5 @@
 use crate::structs::Token;
 
-#[derive(Clone)]
 pub struct Batch {
     lin_index: usize,
     tokens: Vec<Token>,
@@ -28,12 +27,5 @@ impl Batch {
         let tok_index = self.tokens.len() + 1;
         let token = Token::new(tok_index, value);
         self.tokens.push(token);
-    }
-    
-    pub fn to_code_snippet(&self) -> String {
-        self.tokens.iter()
-            .map(Token::to_definition)
-            .collect::<Vec<_>>()
-            .join(" ")
     }
 }

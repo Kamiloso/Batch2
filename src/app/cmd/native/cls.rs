@@ -1,19 +1,14 @@
 use crate::utils::cli;
 use crate::error::RuntimeResult;
-use crate::app::context::RuntimeContext;
-use crate::app::cmd::{Cmd, cmd_pre_assert};
+use crate::app::cmd::CmdContext;
+use crate::define_native_cmd;
 
-pub struct Cls;
+define_native_cmd!(Cls, "cls");
 
-impl Cmd for Cls {
-    fn name(&self) -> &'static str { "cls" }
-    fn min(&self) -> usize { 1 }
-    
-    fn execute(&self, context: RuntimeContext) -> RuntimeResult<String> {
-        cmd_pre_assert::<Self>(self, &context)?;
-        
+impl Cls {
+    fn execute(_: CmdContext) -> RuntimeResult<String> {
         cli::clear!();
-        
+
         Ok(String::new())
     }
 }
