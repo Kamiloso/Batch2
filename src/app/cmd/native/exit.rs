@@ -6,7 +6,7 @@ define_native_cmd!(Exit, "exit");
 
 impl Exit {
     fn execute(ctx: CmdContext) -> RuntimeResult<String> {
-        if ctx.token_count() >= 2 {
+        if ctx.tokens_len() >= 2 {
             let code = ctx.parse_token(1)?;
             ctx.raise_failure_code(code)?
         }

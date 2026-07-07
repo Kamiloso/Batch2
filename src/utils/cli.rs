@@ -49,8 +49,6 @@ macro_rules! _cli_multiline_input {
         $crate::utils::cli::print!($($arg)*);
 
         let mut result = String::new();
-        
-        // TODO: double ^^ must convert into ^ and odd amount indicates newline (only at the end)
 
         loop {
             let mut line = String::new();
@@ -60,15 +58,19 @@ macro_rules! _cli_multiline_input {
 
             let clean_line = line.trim_end_matches(['\r', '\n']);
 
-            if clean_line.ends_with("^^") {
-                result.push_str(&clean_line[..clean_line.len() - 1]);
-                break;
-            } else if clean_line.ends_with('^') {
-                result.push_str(&clean_line[..clean_line.len() - 1]);
+            let caret_count = clean_line.chars().rev().take_while(|&c| c == '^').count();
+            let content_len = clean_line.len() - caret_count;
+            
+            result.push_str(&clean_line[..content_len]);
+
+            for _ in 0..(caret_count / 2) {
+                result.push('^');
+            }
+
+            if caret_count % 2 != 0 {
                 result.push('\n');
                 $crate::utils::cli::print!("More? ");
             } else {
-                result.push_str(clean_line);
                 break;
             }
         }

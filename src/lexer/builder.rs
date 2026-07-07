@@ -1,45 +1,53 @@
-use std::mem;
-use crate::structs::Batch;
+mod observer;
+
+use crate::structs::BatchBuf;
+use observer::LineObserver;
 
 pub struct LexBuilder {
-    word: String,
-    batch: Batch,
-    vec: Vec<Batch>,
+    value: String,
+    batch: BatchBuf,
+    vec: Vec<BatchBuf>,
+    observer: LineObserver,
 }
 
 impl LexBuilder {
     pub fn new() -> Self {
         Self {
-            word: String::new(),
-            batch: Batch::make_first(),
+            value: String::new(),
+            batch: BatchBuf::new(),
             vec: Vec::new(),
+            observer: LineObserver::new(),
         }
+    }
+
+    pub fn observe_char(&mut self, c: char) {
+        self.observer.observe_char(c);
     }
     
     pub fn add_char(&mut self, c: char) {
-        self.word.push(c);
+        self.observer.lock();
+        self.value.push(c);
     }
     
-    pub fn flush_to_batch(&mut self) {
-        let taken = mem::take(&mut self.word);
-
-        self.batch.add_token_by_value(taken);
+    pub fn flush_to_batch(&mut self, is_pure: bool) {
+        let value = std::mem::take(&mut self.value);
+        let lin_index = self.observer.release_and_take();
+        
+        self.batch.push_value(value, lin_index, is_pure);
     }
     
     pub fn flush_to_vec(&mut self) {
         self.assert_word_empty();
         
-        let new_batch = Batch::make_next(&self.batch);
-        let taken = mem::replace(&mut self.batch, new_batch);
-        
-        self.vec.push(taken);
+        let batch = std::mem::take(&mut self.batch);
+        self.vec.push(batch);
     }
     
     pub fn is_vec_ready(&self) -> bool {
-        self.word.is_empty() && self.batch.tokens().is_empty()
+        self.value.is_empty() && self.batch.tokens().is_empty()
     }
     
-    pub fn into_vec(self) -> Vec<Batch> {
+    pub fn into_vec(self) -> Vec<BatchBuf> {
         self.assert_word_empty();
         self.assert_batch_empty();
         
@@ -47,7 +55,7 @@ impl LexBuilder {
     }
     
     fn assert_word_empty(&self) {
-        assert!(self.word.is_empty(), "word must be empty");
+        assert!(self.value.is_empty(), "value must be empty");
     }
     
     fn assert_batch_empty(&self) {

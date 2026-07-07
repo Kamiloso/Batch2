@@ -12,7 +12,7 @@ impl CmdContext<'_> {
     pub fn raise_at_token<T>(&self, msg: impl Into<String>, idx: usize) -> PanicResult<T> {
         let token = self.token_at(idx);
         
-        PanicError::new(msg, self.batch.lin_index())
+        PanicError::new(msg, token.lin_index())
             .with_tok_index(token.tok_index())
             .with_token_str(lexer::definition_of(token))
             .with_batch_str(lexer::code_snippet_of(self.batch))

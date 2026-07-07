@@ -4,7 +4,7 @@ use crate::utils::chars;
 
 #[derive(Clone)]
 pub struct SyntaxContext {
-    newline: bool,
+    newline_before: bool,
     lin_index: usize,
     col_index: usize,
 }
@@ -12,21 +12,21 @@ pub struct SyntaxContext {
 impl SyntaxContext {
     pub fn new() -> Self {
         Self {
-            newline: false,
+            newline_before: false,
             lin_index: 1,
             col_index: 0,
         }
     }
     
-    pub fn inject_char(&mut self, c: char) {
+    pub fn observe_char(&mut self, c: char) {
         self.col_index += 1;
         
-        if self.newline {
+        if self.newline_before {
             self.lin_index += 1;
             self.col_index = 1;
         }
 
-        self.newline = chars::is_newline(c);
+        self.newline_before = chars::is_newline(c);
     }
     
     pub fn raise_raw<T>(&self, message: impl Into<String>) -> SyntaxResult<T> {

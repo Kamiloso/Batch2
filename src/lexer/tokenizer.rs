@@ -4,8 +4,8 @@ use crate::lexer::builder::LexBuilder;
 use crate::lexer::state::{PtrState, FreeMode, PtrReturn};
 use crate::lexer::context::SyntaxContext;
 use crate::utils::chars;
-use crate::structs::Batch;
-use crate::utils::text;
+use crate::structs::BatchBuf;
+use crate::utils::utf8;
 
 type SyntaxOption<T> = SyntaxResult<Option<T>>;
 
@@ -31,18 +31,19 @@ impl<'a> BatchTokenizer<'a> {
         }
     }
     
-    pub fn split_into_batches(mut self) -> SyntaxResult<Vec<Batch>> {
+    pub fn split_into_batches(mut self) -> SyntaxResult<Vec<BatchBuf>> {
         let mut chars = self.source_code.chars()
             .chain(iter::once(chars::NEWLINE));
         
-        while let Some(char_pair) = self.next_char_pair(&mut chars)? {
-            let CharPair { c, is_escaped } = char_pair;
+        while let Some(char_pair) = self.take_unescaped_char(&mut chars)? {
+            let CharPair {c, is_escaped} = char_pair;
             
             let Some(PtrReturn {
                 new_state,
                 is_add_char,
                 is_flush_to_batch,
                 is_flush_to_vec,
+                is_pure,
             }) = self.state.get_return_struct(c, is_escaped) else {
                 self.context.raise_at_char("Unexpected character", c)?
             };
@@ -53,7 +54,7 @@ impl<'a> BatchTokenizer<'a> {
                 self.builder.add_char(c);
             }
             if is_flush_to_batch {
-                self.builder.flush_to_batch();
+                self.builder.flush_to_batch(is_pure);
             }
             if is_flush_to_vec {
                 self.builder.flush_to_vec();
@@ -67,27 +68,27 @@ impl<'a> BatchTokenizer<'a> {
         Ok(self.builder.into_vec())
     }
     
-    fn next_char_pair(&mut self, iter: &mut impl Iterator<Item=char>) -> SyntaxOption<CharPair> {
-        let Some(c0) = iter.next() else {
+    fn take_unescaped_char(
+        &mut self,
+        iter: &mut impl Iterator<Item = char>
+    ) -> SyntaxResult<Option<CharPair>> {
+        let Some(c0) = self.take_char(iter) else {
             return Ok(None);
         };
-        
-        self.context.inject_char(c0);
 
         let ctx_snapshot = self.context.clone();
-        let escaper = self.state.escaper();
+        let escaper = self.state.escape_strategy();
         
         if !escaper.is_escape_char(c0) {
             return Ok(Some(CharPair {
                 c: c0,
-                is_escaped: false
+                is_escaped: false,
             }));
         }
 
         let mut escape_seq = String::from(c0);
         
-        while let Some(cn) = iter.next() {
-            self.context.inject_char(cn);
+        while let Some(cn) = self.take_char(iter) {
             escape_seq.push(cn);
 
             if let Some(c) = escaper.try_unescape_seq(&escape_seq) {
@@ -97,10 +98,17 @@ impl<'a> BatchTokenizer<'a> {
                 }));
             }
         }
+
+        let trunc = utf8::truncate(&escape_seq, 2);
+        ctx_snapshot.raise_at_seq("Invalid escape sequence", trunc)?
+    }
+    
+    fn take_char(&mut self, iter: &mut impl Iterator<Item = char>) -> Option<char> {
+        let c = iter.next()?;
         
-        ctx_snapshot.raise_at_seq(
-            "Invalid escape sequence",
-            text::substr(&escape_seq, 0..2)
-        )?
+        self.context.observe_char(c);
+        self.builder.observe_char(c);
+        
+        Some(c)
     }
 }

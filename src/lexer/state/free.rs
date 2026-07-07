@@ -23,7 +23,7 @@ impl FreeMode {
 }
 
 impl PtrState for FreeMode {
-    fn escaper(&self) -> Box<dyn EscapeStrategy> {
+    fn escape_strategy(&self) -> Box<dyn EscapeStrategy> {
         Box::new(DisabledEscapeStrategy)
     }
     

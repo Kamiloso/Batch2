@@ -23,7 +23,7 @@ impl QuoteMode {
 }
 
 impl PtrState for QuoteMode {
-    fn escaper(&self) -> Box<dyn EscapeStrategy> {
+    fn escape_strategy(&self) -> Box<dyn EscapeStrategy> {
         Box::new(RustEscapeStrategy)
     }
     

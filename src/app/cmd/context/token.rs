@@ -4,10 +4,6 @@ use crate::vars;
 use super::CmdContext;
 
 impl CmdContext<'_> {
-    pub fn token_count(&self) -> usize {
-        self.batch.tokens().len()
-    }
-    
     pub fn token_at(&self, idx: usize) -> &Token {
         &self.batch.tokens()[idx]
     }
@@ -32,5 +28,21 @@ impl CmdContext<'_> {
             |key| get(self.env, key),
             |key| get_const(self.env, key),
         )
+    }
+
+    pub fn tokens(&self) -> &[Token] {
+        self.batch.tokens()
+    }
+    
+    pub fn tokens_from(&self, idx: usize) -> &[Token] {
+        if idx <= self.tokens_len() {
+            &self.tokens()[idx..]
+        } else {
+            &[]
+        }
+    }
+
+    pub fn tokens_len(&self) -> usize {
+        self.batch.tokens().len()
     }
 }

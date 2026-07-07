@@ -1,3 +1,3 @@
 pub mod cli;
-pub mod text;
+pub mod utf8;
 pub mod chars;

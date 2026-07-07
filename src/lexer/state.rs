@@ -11,7 +11,7 @@ pub use quote::QuoteMode;
 
 pub trait PtrState
 {
-    fn escaper(&self) -> Box<dyn EscapeStrategy>;
+    fn escape_strategy(&self) -> Box<dyn EscapeStrategy>;
     fn get_return_struct(&self, c: char, is_escaped: bool) -> Option<PtrReturn>;
 }
 
@@ -20,6 +20,7 @@ pub struct PtrReturn {
     pub is_add_char: bool,
     pub is_flush_to_batch: bool,
     pub is_flush_to_vec: bool,
+    pub is_pure: bool,
 }
 
 impl PtrReturn {
@@ -29,6 +30,7 @@ impl PtrReturn {
             is_add_char: false,
             is_flush_to_batch: false,
             is_flush_to_vec: false,
+            is_pure: false,
         }
     }
 
@@ -44,6 +46,11 @@ impl PtrReturn {
 
     pub fn with_flush_to_vec(mut self) -> Self {
         self.is_flush_to_vec = true;
+        self
+    }
+    
+    pub fn with_is_pure(mut self) -> Self {
+        self.is_pure = true;
         self
     }
 }

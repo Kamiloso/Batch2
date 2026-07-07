@@ -1,32 +1,23 @@
+use std::ops::Index;
 use crate::structs::Token;
 
+#[repr(transparent)]
 pub struct Batch {
-    lin_index: usize,
-    tokens: Vec<Token>,
+    tokens: [Token],
 }
 
 impl Batch {
-    pub fn lin_index(&self) -> usize { self.lin_index }
-    pub fn tokens(&self) -> &Vec<Token> { &self.tokens }
-    
-    pub fn make_first() -> Self {
-        Self {
-            lin_index: 1,
-            tokens: Vec::new(),
-        }
-    }
-    
-    pub fn make_next(old_batch: &Batch) -> Self {
-        Self {
-            lin_index: old_batch.lin_index + 1,
-            tokens: Vec::new()
-        }
+    pub fn from_slice(slice: &[Token]) -> &Self {
+        // WHY SAFE: Batch has the same memory layout as [Token]
+        unsafe { &*(slice as *const [Token] as *const Batch) }
     }
 
-    pub fn add_token_by_value(&mut self, value: impl Into<String>) {
-        let tok_index = self.tokens.len() + 1;
-        let token = Token::new(tok_index, value);
-        self.tokens.push(token);
+    pub fn tokens(&self) -> &[Token] {
+        &self.tokens
+    }
+
+    pub fn lin_index(&self) -> usize {
+        self.tokens.first().map_or(0, |t| t.lin_index())
     }
 }
 
@@ -35,3 +26,34 @@ impl AsRef<[Token]> for Batch {
         &self.tokens
     }
 }
+
+impl Index<usize> for Batch {
+    type Output = Token;
+
+    fn index(&self, index: usize) -> &Token {
+        &self.tokens[index]
+    }
+}
+
+macro_rules! impl_index_for_batch {
+    ($($t:ty),*) => {
+        $(
+            impl Index<$t> for Batch {
+                type Output = Batch;
+
+                fn index(&self, index: $t) -> &Batch {
+                    Batch::from_slice(&self.tokens[index])
+                }
+            }
+        )*
+    }
+}
+
+impl_index_for_batch!(
+    std::ops::Range<usize>,
+    std::ops::RangeFrom<usize>,
+    std::ops::RangeTo<usize>,
+    std::ops::RangeFull,
+    std::ops::RangeInclusive<usize>,
+    std::ops::RangeToInclusive<usize>
+);

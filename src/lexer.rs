@@ -1,4 +1,4 @@
-use crate::structs::Batch;
+use crate::structs::BatchBuf;
 use crate::error::SyntaxResult;
 use tokenizer::BatchTokenizer;
 use escaping::escape;
@@ -10,7 +10,7 @@ mod tokenizer;
 mod context;
 mod escaping;
 
-pub fn split_source_code(source_code: &str) -> SyntaxResult<Vec<Batch>> {
+pub fn split_source_code(source_code: &str) -> SyntaxResult<Vec<BatchBuf>> {
     BatchTokenizer::new(source_code).split_into_batches()
 }
 

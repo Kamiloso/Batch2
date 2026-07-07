@@ -8,7 +8,7 @@ impl Echo {
     fn execute(ctx: CmdContext) -> RuntimeResult<String> {
         let mut sb = String::new();
         
-        for i in 1..ctx.token_count() {
+        for i in 1..ctx.tokens_len() {
             sb.push_str(&ctx.token_expansion_at(i));
             sb.push(' ');
         }

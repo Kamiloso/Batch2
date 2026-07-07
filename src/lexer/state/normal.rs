@@ -6,7 +6,7 @@ use crate::lexer::state::{PtrReturn, PtrState, *};
 pub struct NormalMode;
 
 impl PtrState for NormalMode {
-    fn escaper(&self) -> Box<dyn EscapeStrategy> {
+    fn escape_strategy(&self) -> Box<dyn EscapeStrategy> {
         Box::new(DisabledEscapeStrategy)
     }
     

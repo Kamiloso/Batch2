@@ -5,6 +5,8 @@ mod cls;
 mod exit;
 mod cd;
 mod set;
+mod r#if;
+mod r#loop;
 
 #[linkme::distributed_slice]
 pub static NATIVE_CMD_LIST: [&(dyn Cmd + Send + Sync)];

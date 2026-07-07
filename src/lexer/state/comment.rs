@@ -17,7 +17,7 @@ impl CommentMode {
 }
 
 impl PtrState for CommentMode {
-    fn escaper(&self) -> Box<dyn EscapeStrategy> {
+    fn escape_strategy(&self) -> Box<dyn EscapeStrategy> {
         Box::new(DisabledEscapeStrategy)
     }
     

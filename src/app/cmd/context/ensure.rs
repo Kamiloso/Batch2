@@ -7,7 +7,7 @@ impl CmdContext<'_> {
     pub fn ensure_args_at_least(&self, len: usize) -> PanicResult<()> {
         let len = max(1, len);
         
-        if self.token_count() < len {
+        if self.tokens_len() < len {
             self.raise_raw(format!(
                 "Command {} requires at least {} arguments",
                 lexer::definition_of(self.cmd.name()), len,

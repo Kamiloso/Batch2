@@ -1,44 +1,37 @@
 use std::env;
 use std::io;
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 static INIT_GUARD: AtomicBool = AtomicBool::new(false);
 
 pub struct Shell {
-    cd: Option<PathBuf>,
+    cd: PathBuf,
 }
 
 impl Shell {
+    pub fn cd(&self) -> &Path { &self.cd }
+    pub fn cd_str(&self) -> &str { &self.cd.to_str().unwrap_or("") }
+    
     pub fn init() -> Self {
         if INIT_GUARD.swap(true, Ordering::SeqCst) {
             panic!("shell state initialized multiple times")
         }
 
-        let cd = match env::current_dir() {
-            Ok(dir) => Some(dir),
-            Err(_) => None,
-        };
-
-        Self { cd }
-    }
-
-    pub fn cd(&self) -> Option<&Path> {
-        self.cd.as_deref()
+        Self {
+            cd: obtain_current_dir()
+        }
     }
 
     pub fn set_cd(&mut self, path: &Path) -> io::Result<()> {
         env::set_current_dir(path)?;
         
-        self.cd = env::current_dir().ok();
+        self.cd = obtain_current_dir();
 
         Ok(())
     }
+}
 
-    pub fn cd_display(&self) -> String {
-        match &self.cd {
-            Some(path) => path.display().to_string(),
-            None => format!("?:{}", MAIN_SEPARATOR),
-        }
-    }
+fn obtain_current_dir() -> PathBuf {
+    env::current_dir().unwrap_or_else(|_| PathBuf::new())
 }

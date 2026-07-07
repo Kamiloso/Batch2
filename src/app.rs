@@ -3,7 +3,7 @@ mod outcome;
 mod cmd;
 mod shell;
 mod scope;
-mod argv;
+mod run_mode;
 
 use std::fs;
 use std::path::Path;
@@ -11,7 +11,7 @@ use std::process::ExitCode;
 use crate::utils::cli;
 use outcome::Outcome;
 use environment::Environment;
-use argv::RunMode;
+use run_mode::RunMode;
 
 pub fn run() -> ExitCode {
     match RunMode::obtain() {
@@ -22,7 +22,7 @@ pub fn run() -> ExitCode {
 
 fn run_terminal(mut env: Environment) -> ExitCode {
     loop {
-        let prefix = env.shell().cd_display();
+        let prefix = env.shell().cd_str();
         let source_code = cli::multiline_input!("{prefix}> ");
         let result = env.interpret(&source_code);
 

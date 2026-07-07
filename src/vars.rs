@@ -3,8 +3,8 @@ const DELIM_CONST: char = '!';
 
 pub fn perform_expansion<'a>(
     value: impl AsRef<str>,
-    mut get_variable: impl FnMut(&str) -> &'a str,
-    mut get_constant: impl FnMut(&str) -> &'a str,
+    mut get: impl FnMut(&str) -> &'a str,
+    mut get_const: impl FnMut(&str) -> &'a str,
 ) -> String {
     let source_str = value.as_ref();
     let mut result = String::with_capacity(source_str.len());
@@ -24,9 +24,9 @@ pub fn perform_expansion<'a>(
                     result.push(delim);
                 } else {
                     if delim == DELIM_VAR {
-                        result.push_str(get_variable(name));
+                        result.push_str(get(name));
                     } else {
-                        result.push_str(get_constant(name));
+                        result.push_str(get_const(name));
                     }
                 }
 

@@ -1,10 +1,8 @@
-use std::path::Path;
 use crate::app::cmd;
 use crate::app::shell::Shell;
 use crate::app::scope::Scope;
 use crate::error::InterpreterResult;
 use crate::lexer;
-use crate::structs::Batch;
 
 pub struct Environment {
     shell: Shell,
@@ -23,8 +21,7 @@ impl Environment {
     }
 
     pub fn interpret(&mut self, source_code: &str) -> InterpreterResult<String> {
-        let batches: Vec<Batch> = lexer::split_source_code(source_code)?;
-
+        let batches = lexer::split_source_code(source_code)?;
         let mut out_buffer = String::new();
 
         for batch in batches {
@@ -52,11 +49,8 @@ impl Environment {
         match key.as_ref() {
             "true" => "T",
             "false" => "",
-            "cd" => {
-                let path = self.shell.cd().unwrap_or(Path::new(""));
-                path.to_str().unwrap_or("")
-            },
-            _ => ""
+            "cd" => self.shell.cd().to_str().unwrap_or(""),
+            _ => "",
         }
     }
     
