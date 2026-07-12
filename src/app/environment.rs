@@ -59,14 +59,10 @@ impl Environment {
     }
     
     pub fn exit_scope(&mut self) {
-        if self.is_root_scope() {
+        if self.scopes.len() == 1 {
             panic!("cannot exit the root scope");
         }
         
         self.scopes.pop();
-    }
-
-    pub fn is_root_scope(&self) -> bool {
-        self.scopes.len() == 1
     }
 }
