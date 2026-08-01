@@ -1,6 +1,6 @@
 use crate::error::{SyntaxError, SyntaxResult};
 use crate::lexer;
-use crate::utils::chars;
+use crate::tools::chars;
 
 #[derive(Clone)]
 pub struct SyntaxContext {

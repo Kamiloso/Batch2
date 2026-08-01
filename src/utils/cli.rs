@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 macro_rules! _cli_print {
     ($($arg:tt)*) => {{
         std::print!($($arg)*);

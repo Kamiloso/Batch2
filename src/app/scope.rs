@@ -9,11 +9,18 @@ impl Scope {
         Self { dict: HashMap::new() }
     }
 
-    pub fn get(&self, key: &str) -> Option<&str> {
-        self.dict.get(key).map(|s| s.as_str())
+    pub fn get(&self, key: &str) -> &str {
+        self.dict.get(key).map(String::as_str).unwrap_or("")
     }
 
-    pub fn set(&mut self, key: impl Into<String>, value: impl Into<String>) {
-        self.dict.insert(key.into(), value.into());
+    pub fn set(&mut self, key: &str, value: &str) {
+        if value.is_empty() {
+            self.dict.remove(key);
+        } else if let Some(existing) = self.dict.get_mut(key) {
+            existing.clear();
+            existing.push_str(value);
+        } else {
+            self.dict.insert(String::from(key), String::from(value));
+        }
     }
 }

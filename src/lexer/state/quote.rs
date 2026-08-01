@@ -1,4 +1,4 @@
-use crate::utils::chars;
+use crate::tools::chars;
 use crate::lexer::escaping::RustEscapeStrategy;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 
@@ -16,7 +16,7 @@ pub struct QuoteMode {
 }
 
 impl QuoteMode {
-    pub fn set_mode(mut self, mode: Mode) -> Self {
+    pub fn with_mode(mut self, mode: Mode) -> Self {
         self.mode = mode;
         self
     }
@@ -30,8 +30,8 @@ impl PtrState for QuoteMode {
     fn get_return_struct(&self, c: char, is_escaped: bool) -> Option<PtrReturn> {
         if chars::is_quote(c) && !is_escaped {
             match self.mode {
-                Mode::Before => Some(PtrReturn::new(self.clone().set_mode(Mode::During))),
-                Mode::During => Some(PtrReturn::new(self.clone().set_mode(Mode::After))),
+                Mode::Before => Some(PtrReturn::new(self.clone().with_mode(Mode::During))),
+                Mode::During => Some(PtrReturn::new(self.clone().with_mode(Mode::After))),
                 Mode::After => None,
             }
         } else {

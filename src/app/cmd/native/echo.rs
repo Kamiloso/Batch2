@@ -1,22 +1,22 @@
 use crate::app::cmd::CmdContext;
 use crate::error::RuntimeResult;
-use crate::define_native_cmd;
+use super::define_cmd;
 
-define_native_cmd!(Echo, "echo");
+define_cmd!(Echo, "echo");
 
 impl Echo {
-    fn execute(ctx: CmdContext) -> RuntimeResult<String> {
-        let mut sb = String::new();
-        
+    fn execute(mut ctx: CmdContext) -> RuntimeResult<()> {
         for i in 1..ctx.tokens_len() {
-            sb.push_str(&ctx.token_expansion_at(i));
-            sb.push(' ');
+            let expansion = ctx.token_expansion_at(i);
+            ctx.stream_mut().print(&expansion);
+            
+            if i != ctx.tokens_len() - 1 {
+                ctx.stream_mut().print(" ");
+            }
         }
+        
+        ctx.stream_mut().print("\n");
 
-        if sb.ends_with(' ') {
-            sb.pop();
-        }
-
-        Ok(sb + "\n")
+        Ok(())
     }
 }

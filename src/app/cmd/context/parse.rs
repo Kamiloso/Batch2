@@ -4,7 +4,7 @@ use crate::error::PanicResult;
 use crate::lexer;
 use super::CmdContext;
 
-impl CmdContext<'_> {
+impl CmdContext<'_, '_> {
     pub fn parse_token<F: FromStr>(&self, idx: usize) -> PanicResult<F> {
         let expansion = &self.token_expansion_at(idx);
         

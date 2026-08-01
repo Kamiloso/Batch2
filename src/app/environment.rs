@@ -3,6 +3,7 @@ use crate::app::shell::Shell;
 use crate::app::scope::Scope;
 use crate::error::InterpreterResult;
 use crate::lexer;
+use crate::tools::stream::Stream;
 
 pub struct Environment {
     shell: Shell,
@@ -20,34 +21,27 @@ impl Environment {
         }
     }
 
-    pub fn interpret(&mut self, source_code: &str) -> InterpreterResult<String> {
+    pub fn interpret(&mut self, source_code: &str, stream: &mut Stream) -> InterpreterResult<()> {
         let batches = lexer::split_source_code(source_code)?;
-        let mut out_buffer = String::new();
 
         for batch in batches {
-            out_buffer += &cmd::delegate_action(self, &batch)?;
+            cmd::delegate_action(self, stream, &batch)?;
         }
 
-        Ok(out_buffer)
+        Ok(())
     }
 
     pub fn get(&self, key: &str) -> &str {
-        for scope in self.scopes.iter().rev() {
-            if let Some(value) = scope.get(key.as_ref()) {
-                return value;
-            }
-        }
-
-        ""
+        self.scopes.last().unwrap().get(key)
     }
 
-    pub fn set(&mut self, key: impl Into<String>, value: impl Into<String>) {
+    pub fn set(&mut self, key: &str, value: &str) {
         self.scopes.last_mut().unwrap().set(key, value);
     }
     
     pub fn get_const(&self, key: &str) -> &str {
         match key.as_ref() {
-            "true" => "T",
+            "true" => "1",
             "false" => "",
             "cd" => self.shell.cd().to_str().unwrap_or(""),
             _ => "",

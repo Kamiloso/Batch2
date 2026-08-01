@@ -19,7 +19,7 @@ impl Shell {
         }
 
         Self {
-            cd: obtain_current_dir()
+            cd: obtain_current_dir(),
         }
     }
 

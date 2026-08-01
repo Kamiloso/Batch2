@@ -2,6 +2,7 @@ mod free;
 mod normal;
 mod comment;
 mod quote;
+mod bracket;
 
 use crate::lexer::escaping::EscapeStrategy;
 pub use free::FreeMode;

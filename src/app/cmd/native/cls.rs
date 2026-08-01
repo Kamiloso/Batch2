@@ -1,14 +1,14 @@
 use crate::utils::cli;
 use crate::error::RuntimeResult;
 use crate::app::cmd::CmdContext;
-use crate::define_native_cmd;
+use super::define_cmd;
 
-define_native_cmd!(Cls, "cls");
+define_cmd!(Cls, "cls");
 
 impl Cls {
-    fn execute(_: CmdContext) -> RuntimeResult<String> {
+    fn execute(_: CmdContext) -> RuntimeResult<()> {
         cli::clear!();
 
-        Ok(String::new())
+        Ok(())
     }
 }

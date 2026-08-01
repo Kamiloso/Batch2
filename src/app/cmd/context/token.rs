@@ -1,9 +1,9 @@
 use crate::app::environment::Environment;
 use crate::structs::Token;
-use crate::vars;
+use crate::tools::expansion;
 use super::CmdContext;
 
-impl CmdContext<'_> {
+impl CmdContext<'_, '_> {
     pub fn token_at(&self, idx: usize) -> &Token {
         &self.batch.tokens()[idx]
     }
@@ -23,7 +23,7 @@ impl CmdContext<'_> {
             env.get_const(key)
         }
 
-        vars::perform_expansion(
+        expansion::perform_expansion(
             raw_value,
             |key| get(self.env, key),
             |key| get_const(self.env, key),

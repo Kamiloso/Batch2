@@ -1,6 +1,7 @@
-use crate::utils::chars;
+use crate::tools::chars;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 use crate::lexer::escaping::DisabledEscapeStrategy;
+use crate::lexer::state::bracket::BracketMode;
 
 #[derive(Clone)]
 pub struct FreeMode {
@@ -46,6 +47,7 @@ impl PtrState for FreeMode {
             _ if chars::is_solid(c) => Box::new(NormalMode::default()),
             _ if chars::is_quote(c) => Box::new(QuoteMode::default()),
             _ if chars::is_colon(c) => Box::new(CommentMode::default()),
+            _ if chars::is_bracket_open(c) => Box::new(BracketMode::default()),
             _ => return None
         };
         

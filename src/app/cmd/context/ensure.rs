@@ -3,7 +3,7 @@ use crate::error::PanicResult;
 use crate::lexer;
 use super::CmdContext;
 
-impl CmdContext<'_> {
+impl CmdContext<'_, '_> {
     pub fn ensure_args_at_least(&self, len: usize) -> PanicResult<()> {
         let len = max(1, len);
         

@@ -5,7 +5,7 @@ pub struct EvalPair<T> {
     pub next_idx: usize,
 }
 
-impl CmdContext<'_> {
+impl CmdContext<'_, '_> {
     pub fn eval_logic(&self, idx: usize) -> EvalPair<bool> {
         EvalPair {
             result: self.token_expansion_at(idx) != "",

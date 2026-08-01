@@ -7,12 +7,13 @@ mod cd;
 mod set;
 mod r#if;
 mod r#loop;
+mod sleep;
+mod r#for;
 
 #[linkme::distributed_slice]
 pub static NATIVE_CMD_LIST: [&(dyn Cmd + Send + Sync)];
 
-#[macro_export]
-macro_rules! define_native_cmd {
+macro_rules! _native_define_cmd {
     ($id:ident, $name:expr) => {
         pub struct $id;
 
@@ -31,9 +32,11 @@ macro_rules! define_native_cmd {
             fn execute(
                 &self,
                 context: crate::app::cmd::CmdContext
-            ) -> crate::error::RuntimeResult<String> {
+            ) -> crate::error::RuntimeResult<()> {
                 $id::execute(context)
             }
         }
     };
 }
+
+pub(super) use _native_define_cmd as define_cmd;

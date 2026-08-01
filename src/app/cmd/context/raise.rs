@@ -2,7 +2,7 @@ use crate::error::{ExitError, ExitResult, PanicError, PanicResult};
 use crate::lexer;
 use super::CmdContext;
 
-impl CmdContext<'_> {
+impl CmdContext<'_, '_> {
     pub fn raise_raw<T>(&self, msg: impl Into<String>) -> PanicResult<T> {
         PanicError::new(msg, self.batch.lin_index())
             .with_batch_str(lexer::code_snippet_of(self.batch))

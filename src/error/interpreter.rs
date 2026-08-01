@@ -1,11 +1,9 @@
-#![allow(unused_imports)]
-
 mod syntax;
 mod runtime;
 
 use thiserror::Error;
-pub use syntax::{SyntaxError, *};
-pub use runtime::{RuntimeError, *};
+pub use syntax::*;
+pub use runtime::*;
 
 pub type InterpreterResult<T> = Result<T, InterpreterError>;
 
@@ -13,7 +11,7 @@ pub type InterpreterResult<T> = Result<T, InterpreterError>;
 pub enum InterpreterError {
     #[error(transparent)]
     Syntax(#[from] SyntaxError),
-
+    
     #[error(transparent)]
     Runtime(#[from] RuntimeError),
 }

@@ -1,9 +1,7 @@
-#![allow(unused_imports)]
-
 mod interpreter;
 
 use thiserror::Error;
-pub use interpreter::{InterpreterError, *};
+pub use interpreter::*;
 
 pub type AnyResult<T> = Result<T, AnyError>;
 

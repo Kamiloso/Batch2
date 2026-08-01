@@ -1,11 +1,9 @@
-#![allow(unused_imports)]
-
 mod panic;
 mod exit;
 
 use thiserror::Error;
-pub use panic::{PanicError, *};
-pub use exit::{ExitError, *};
+pub use panic::*;
+pub use exit::*;
 
 pub type RuntimeResult<T> = Result<T, RuntimeError>;
 

@@ -1,5 +1,4 @@
-const DELIM_VAR: char = '%';
-const DELIM_CONST: char = '!';
+use crate::tools::chars::{PERCENT, EXCLAMATION};
 
 pub fn perform_expansion<'a>(
     value: impl AsRef<str>,
@@ -10,7 +9,7 @@ pub fn perform_expansion<'a>(
     let mut result = String::with_capacity(source_str.len());
     let mut slice = source_str;
 
-    while let Some(idx) = slice.find(&[DELIM_VAR, DELIM_CONST]) {
+    while let Some(idx) = slice.find(&[PERCENT, EXCLAMATION]) {
         result.push_str(&slice[..idx]);
 
         let delim = slice[idx..].chars().next().unwrap();
@@ -23,7 +22,7 @@ pub fn perform_expansion<'a>(
                 if name.is_empty() {
                     result.push(delim);
                 } else {
-                    if delim == DELIM_VAR {
+                    if delim == PERCENT {
                         result.push_str(get(name));
                     } else {
                         result.push_str(get_const(name));

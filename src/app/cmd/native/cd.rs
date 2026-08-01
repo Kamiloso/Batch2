@@ -1,12 +1,12 @@
 use std::path::Path;
 use crate::error::RuntimeResult;
 use crate::app::cmd::CmdContext;
-use crate::define_native_cmd;
+use super::define_cmd;
 
-define_native_cmd!(Cd, "cd");
+define_cmd!(Cd, "cd");
 
 impl Cd {
-    fn execute(mut ctx: CmdContext) -> RuntimeResult<String> {
+    fn execute(mut ctx: CmdContext) -> RuntimeResult<()> {
         ctx.ensure_args_at_least(2)?;
         
         let path_str = &ctx.token_expansion_at(1);
@@ -18,6 +18,6 @@ impl Cd {
             ), 1)?
         }
         
-        Ok(String::new())
+        Ok(())
     }
 }
