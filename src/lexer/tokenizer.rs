@@ -22,17 +22,18 @@ pub struct BatchTokenizer<'a> {
 }
 
 impl<'a> BatchTokenizer<'a> {
-    pub fn new(source_code: &'a str) -> Self {
+    pub fn new(source_code: &'a str, robust_errors: bool) -> Self {
         Self {
             source_code,
             builder: LexBuilder::new(),
             state: Box::new(FreeMode::new_invoked()),
-            context: SyntaxContext::new(),
+            context: SyntaxContext::new(robust_errors),
         }
     }
     
     pub fn split_into_batches(mut self) -> SyntaxResult<Vec<BatchBuf>> {
-        let mut chars = self.source_code.chars()
+        let mut chars = self.source_code
+            .chars()
             .chain(iter::once(chars::NEWLINE));
         
         while let Some(char_pair) = self.take_unescaped_char(&mut chars)? {
@@ -43,7 +44,6 @@ impl<'a> BatchTokenizer<'a> {
                 is_add_char,
                 is_flush_to_batch,
                 is_flush_to_vec,
-                is_pure,
             }) = self.state.get_return_struct(c, is_escaped) else {
                 self.context.raise_at_char("Unexpected character", c)?
             };
@@ -54,7 +54,7 @@ impl<'a> BatchTokenizer<'a> {
                 self.builder.add_char(c);
             }
             if is_flush_to_batch {
-                self.builder.flush_to_batch(is_pure);
+                self.builder.flush_to_batch();
             }
             if is_flush_to_vec {
                 self.builder.flush_to_vec();
@@ -99,8 +99,8 @@ impl<'a> BatchTokenizer<'a> {
             }
         }
 
-        let trunc = utf8::truncate(&escape_seq, 2);
-        ctx_snapshot.raise_at_seq("Invalid escape sequence", trunc)?
+        let truncated = utf8::truncate(&escape_seq, 2);
+        ctx_snapshot.raise_at_seq("Invalid escape sequence", truncated)?
     }
     
     fn take_char(&mut self, iter: &mut impl Iterator<Item = char>) -> Option<char> {

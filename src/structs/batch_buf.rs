@@ -13,9 +13,9 @@ impl BatchBuf {
         }
     }
 
-    pub fn push_value(&mut self, value: impl Into<String>, lin_index: usize, is_pure: bool) {
+    pub fn push_value(&mut self, value: impl Into<String>, lin_index: usize) {
         let tok_index = self.tokens.len() + 1;
-        let token = Token::new(lin_index, tok_index, is_pure, value);
+        let token = Token::new(value, lin_index, tok_index);
         
         self.tokens.push(token);
     }

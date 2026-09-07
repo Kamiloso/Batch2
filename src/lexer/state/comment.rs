@@ -1,5 +1,5 @@
 use crate::tools::chars;
-use crate::lexer::escaping::DisabledEscapeStrategy;
+use crate::tools::escaping::DisabledEscapeStrategy;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 
 #[derive(Default, Clone)]

@@ -9,7 +9,10 @@ impl If {
     fn execute(mut ctx: CmdContext) -> RuntimeResult<()> {
         ctx.ensure_args_at_least(2)?;
         
-        if let EvalPair { result: true, next_idx } = ctx.eval_logic(1) {
+        if let EvalPair {
+            result: true,
+            next_idx
+        } = ctx.eval_logic(1)? {
             return Ok(ctx.run_from(next_idx)?);
         }
 

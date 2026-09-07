@@ -1,5 +1,5 @@
 use crate::tools::chars;
-use crate::lexer::escaping::RustEscapeStrategy;
+use crate::tools::escaping::RustEscapeStrategy;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 
 #[derive(Default, Clone, Copy, PartialEq, Eq)]
@@ -39,7 +39,7 @@ impl PtrState for QuoteMode {
                 Mode::Before => None,
                 Mode::During => Some(PtrReturn::new(self.clone()).with_add_char()),
                 Mode::After => {
-                    if chars::is_transparent(c) {
+                    if chars::is_whitespace(c) {
                         FreeMode::new_fresh().get_return_struct(c, is_escaped)
                     } else {
                         None

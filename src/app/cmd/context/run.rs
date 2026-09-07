@@ -1,6 +1,6 @@
 use crate::app::cmd;
 use crate::app::cmd::context::CmdContext;
-use crate::error::RuntimeResult;
+use crate::error::{PanicResult, RuntimeResult};
 
 impl CmdContext<'_, '_> {
     pub fn run_from(&mut self, idx: usize) -> RuntimeResult<()> {

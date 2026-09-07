@@ -22,7 +22,7 @@ impl Environment {
     }
 
     pub fn interpret(&mut self, source_code: &str, stream: &mut Stream) -> InterpreterResult<()> {
-        let batches = lexer::split_source_code(source_code)?;
+        let batches = lexer::compile(source_code)?;
 
         for batch in batches {
             cmd::delegate_action(self, stream, &batch)?;

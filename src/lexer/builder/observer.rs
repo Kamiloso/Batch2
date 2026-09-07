@@ -4,6 +4,8 @@ pub struct LineObserver {
     locked: bool,
 }
 
+// TODO: there is something wrong with line counting here
+
 impl LineObserver {
     pub fn new() -> LineObserver {
         Self {

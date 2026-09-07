@@ -29,11 +29,11 @@ impl LexBuilder {
         self.value.push(c);
     }
     
-    pub fn flush_to_batch(&mut self, is_pure: bool) {
+    pub fn flush_to_batch(&mut self) {
         let value = std::mem::take(&mut self.value);
         let lin_index = self.observer.release_and_take();
         
-        self.batch.push_value(value, lin_index, is_pure);
+        self.batch.push_value(value, lin_index);
     }
     
     pub fn flush_to_vec(&mut self) {

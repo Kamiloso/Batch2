@@ -23,6 +23,10 @@ impl SyntaxError {
         }
     }
     
+    pub fn any() -> Self {
+        Self::new("", 0, 0)
+    }
+    
     pub fn with_char_str(mut self, char_str: impl Into<String>) -> Self {
         self.char_str = Some(char_str.into());
         self

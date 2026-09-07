@@ -4,11 +4,11 @@ mod comment;
 mod quote;
 mod bracket;
 
-use crate::lexer::escaping::EscapeStrategy;
-pub use free::FreeMode;
-pub use normal::NormalMode;
-pub use comment::CommentMode;
-pub use quote::QuoteMode;
+use crate::tools::escaping::EscapeStrategy;
+pub use free::*;
+pub use normal::*;
+pub use comment::*;
+pub use quote::*;
 
 pub trait PtrState
 {
@@ -21,7 +21,6 @@ pub struct PtrReturn {
     pub is_add_char: bool,
     pub is_flush_to_batch: bool,
     pub is_flush_to_vec: bool,
-    pub is_pure: bool,
 }
 
 impl PtrReturn {
@@ -31,7 +30,6 @@ impl PtrReturn {
             is_add_char: false,
             is_flush_to_batch: false,
             is_flush_to_vec: false,
-            is_pure: false,
         }
     }
 
@@ -47,11 +45,6 @@ impl PtrReturn {
 
     pub fn with_flush_to_vec(mut self) -> Self {
         self.is_flush_to_vec = true;
-        self
-    }
-    
-    pub fn with_is_pure(mut self) -> Self {
-        self.is_pure = true;
         self
     }
 }

@@ -18,12 +18,29 @@ define_chars! {
     BRACKET_CLOSE, is_bracket_close, ')';
     PERCENT, is_percent, '%';
     EXCLAMATION, is_exclamation, '!';
+    ESCAPE, is_escape, '\\';
+    PLUS, is_plus, '+';
+    MINUS, is_minus, '-';
+    MULTIPLY, is_multiply, '*';
+    DIVIDE, is_divide, '/';
+    EQUALS, is_equals, '=';
+    DOT, is_dot, '.';
+    UNDERSCORE, is_underscore, '_';
 }
 
-pub fn is_transparent(c: char) -> bool {
-    char::is_whitespace(c) || c == NEWLINE
+pub fn is_whitespace(c: char) -> bool {
+    char::is_whitespace(c)
+}
+
+pub fn is_expansion(c: char) -> bool {
+    matches!(c, PERCENT | EXCLAMATION)
 }
 
 pub fn is_solid(c: char) -> bool {
-    c.is_alphanumeric() || matches!(c, '_' | '%' | '!' | '=' | '.')
+    // TODO: '=' is temporary
+    c.is_alphanumeric() || is_expansion(c) || matches!(c, UNDERSCORE | DOT | '=')
+}
+
+pub fn is_operator(c: char) -> bool {
+    matches!(c, PLUS | MINUS | MULTIPLY | DIVIDE | EQUALS | EXCLAMATION)
 }

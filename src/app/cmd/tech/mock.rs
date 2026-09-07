@@ -7,7 +7,7 @@ pub struct Mock;
 impl Cmd for Mock {
     fn name(&self) -> &str { "__mock__" }
     fn name_matches(&self, _: &str) -> bool { false }
-
+    
     fn execute(&self, _: CmdContext) -> RuntimeResult<()> {
         Ok(())
     }

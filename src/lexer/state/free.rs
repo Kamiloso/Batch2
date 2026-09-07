@@ -1,6 +1,6 @@
 use crate::tools::chars;
 use crate::lexer::state::{PtrReturn, PtrState, *};
-use crate::lexer::escaping::DisabledEscapeStrategy;
+use crate::tools::escaping::DisabledEscapeStrategy;
 use crate::lexer::state::bracket::BracketMode;
 
 #[derive(Clone)]
@@ -29,7 +29,7 @@ impl PtrState for FreeMode {
     }
     
     fn get_return_struct(&self, c: char, is_escaped: bool) -> Option<PtrReturn> {
-        if chars::is_transparent(c) {
+        if chars::is_whitespace(c) {
             let mut ptr_return = PtrReturn::new(self.clone().with_invoked());
 
             if !self.invoked {

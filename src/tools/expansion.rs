@@ -1,15 +1,14 @@
-use crate::tools::chars::{PERCENT, EXCLAMATION};
+use crate::tools::chars;
 
 pub fn perform_expansion<'a>(
     value: impl AsRef<str>,
-    mut get: impl FnMut(&str) -> &'a str,
-    mut get_const: impl FnMut(&str) -> &'a str,
+    mut get: impl FnMut(&str, char) -> &'a str,
 ) -> String {
     let source_str = value.as_ref();
     let mut result = String::with_capacity(source_str.len());
     let mut slice = source_str;
 
-    while let Some(idx) = slice.find(&[PERCENT, EXCLAMATION]) {
+    while let Some(idx) = slice.find(chars::is_expansion) {
         result.push_str(&slice[..idx]);
 
         let delim = slice[idx..].chars().next().unwrap();
@@ -22,11 +21,7 @@ pub fn perform_expansion<'a>(
                 if name.is_empty() {
                     result.push(delim);
                 } else {
-                    if delim == PERCENT {
-                        result.push_str(get(name));
-                    } else {
-                        result.push_str(get_const(name));
-                    }
+                    result.push_str(get(name, delim));
                 }
 
                 &after_delim[end_offset + delim.len_utf8()..]
@@ -39,5 +34,20 @@ pub fn perform_expansion<'a>(
     }
     
     result.push_str(slice);
+    result
+}
+
+pub fn duplicate_expansion_chars(value: impl AsRef<str>) -> String {
+    let source_str = value.as_ref();
+    let mut result = String::with_capacity(source_str.len());
+
+    for c in source_str.chars() {
+        result.push(c);
+        
+        if chars::is_expansion(c) {
+            result.push(c);
+        }
+    }
+
     result
 }

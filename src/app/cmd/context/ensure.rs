@@ -8,9 +8,12 @@ impl CmdContext<'_, '_> {
         let len = max(1, len);
         
         if self.tokens_len() < len {
+            let name = self.cmd.name();
+            let name_definition = lexer::get_definition_display(name);
+            
             self.raise_raw(format!(
                 "Command {} requires at least {} arguments",
-                lexer::definition_of(self.cmd.name()), len,
+                name_definition, len,
             ))?
         }
         
@@ -18,13 +21,15 @@ impl CmdContext<'_, '_> {
     }
     
     pub fn ensure_arg_is(&self, idx: usize, expected: &str) -> PanicResult<()> {
-        let token = self.token_at(idx);
         let value = self.token_value_at(idx);
         
-        if token.value() != expected {
+        if value != expected {
+            let expected_definition = lexer::get_definition_display(expected);
+            let value_definition = lexer::get_definition_display(value);
+            
             self.raise_at_token(format!(
                 "Argument {} must be {}, but was {}",
-                idx, lexer::definition_of(expected), lexer::definition_of(value)
+                idx, expected_definition, value_definition
             ), idx)?
         }
         

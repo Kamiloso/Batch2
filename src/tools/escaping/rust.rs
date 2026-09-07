@@ -1,7 +1,6 @@
+use crate::tools::chars::ESCAPE;
 use super::EscapeStrategy;
-use super::{escape, unescape};
-
-const ESCAPE: char = '\\';
+use super::{escape_raw, unescape_raw};
 
 pub struct RustEscapeStrategy;
 
@@ -11,7 +10,8 @@ impl EscapeStrategy for RustEscapeStrategy {
     }
 
     fn try_unescape_seq(&self, seq: &str) -> Option<char> {
-        let text = unescape(seq)?;
+        let text = unescape_raw(seq)?;
+        
         if text.chars().count() == 1 {
             text.chars().next()
         } else {
@@ -20,6 +20,6 @@ impl EscapeStrategy for RustEscapeStrategy {
     }
 
     fn char_to_safe_text(&self, char: char) -> String {
-        escape(&String::from(char))
+        escape_raw(&String::from(char))
     }
 }

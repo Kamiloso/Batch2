@@ -1,10 +1,10 @@
-use crate::types::DuckParser;
+use crate::types::{ShapeParse, ShapeStringify};
 
-pub struct RangeType;
+pub struct RangeShape;
 
-impl DuckParser for RangeType {
-    type Ref<'a> = (i64, i64);
-
+impl ShapeParse for RangeShape {
+    type Output = (i64, i64);
+    
     fn parse(value: &str) -> Option<(i64, i64)> {
         let split = value
             .split("..")
@@ -19,6 +19,10 @@ impl DuckParser for RangeType {
         
         Some((beg, end))
     }
+}
+
+impl ShapeStringify for RangeShape {
+    type Input<'t> = (i64, i64);
     
     fn stringify(value: (i64, i64)) -> String {
         format!("{}..{}", value.0, value.1)

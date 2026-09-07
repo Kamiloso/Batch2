@@ -1,6 +1,7 @@
 use crate::app::environment::Environment;
 use crate::structs::Token;
 use crate::tools::expansion;
+use crate::tools::chars::{PERCENT, EXCLAMATION};
 use super::CmdContext;
 
 impl CmdContext<'_, '_> {
@@ -25,8 +26,11 @@ impl CmdContext<'_, '_> {
 
         expansion::perform_expansion(
             raw_value,
-            |key| get(self.env, key),
-            |key| get_const(self.env, key),
+            |key, delim| match delim {
+                PERCENT => get(self.env, key),
+                EXCLAMATION => get_const(self.env, key),
+                _ => unreachable!(),
+            },
         )
     }
 

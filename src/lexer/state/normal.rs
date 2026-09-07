@@ -1,5 +1,5 @@
 use crate::tools::chars;
-use crate::lexer::escaping::DisabledEscapeStrategy;
+use crate::tools::escaping::DisabledEscapeStrategy;
 use crate::lexer::state::{PtrReturn, PtrState, *};
 
 #[derive(Default, Clone)]
@@ -15,7 +15,7 @@ impl PtrState for NormalMode {
             return Some(PtrReturn::new(self.clone()).with_add_char());
         }
         
-        if chars::is_transparent(c) {
+        if chars::is_whitespace(c) {
             return FreeMode::new_fresh().get_return_struct(c, is_escaped);
         }
         
